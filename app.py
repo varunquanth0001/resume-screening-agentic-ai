@@ -341,7 +341,7 @@ with col1:
                     fig_radar.add_trace(go.Scatterpolar(r=list(r.scores.values()), theta=list(r.scores.keys()), fill='toself', name=r.candidate_name))
                 fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), showlegend=True, template="plotly_white", title="Top 3 Candidates Comparison")
                 
-                radar_img_bytes = fig_radar.to_image(format="png", width=800, height=400)
+                radar_img_bytes = fig_radar.to_image(format="png", width=800, height=400, engine="kaleido")
                 radar_img_path = "temp_radar.png"
                 with open(radar_img_path, "wb") as f:
                     f.write(radar_img_bytes)
@@ -357,7 +357,7 @@ with col1:
                 fig_bubble = px.scatter(df_bubble, x="Rank", y="Score", size="Score", color="Score", title="Batch Match Strength Overview")
                 fig_bubble.update_layout(template="plotly_white")
                 
-                bubble_img_bytes = fig_bubble.to_image(format="png", width=800, height=400)
+                bubble_img_bytes = fig_bubble.to_image(format="png", width=800, height=400, engine="kaleido")
                 bubble_img_path = "temp_bubble.png"
                 with open(bubble_img_path, "wb") as f:
                     f.write(bubble_img_bytes)
@@ -458,21 +458,44 @@ with col1:
             doc.add_paragraph(f"Total Processed: {st.session_state.metrics.get('total_processed')}")
             doc.add_paragraph(f"Batch Avg Score: {st.session_state.metrics.get('avg_score')}%")
 
+            # --- Embedding Visualizations in Word ---
             try:
-                doc.add_heading('2. Batch Distribution', level=1)
-                all_scores = [r.total_score for r in st.session_state.results]
-                fig_hist = px.histogram(all_scores, nbins=10, title="Batch Quality Distribution")
-                hist_bytes = fig_hist.to_image(format="png", engine="kaleido")
-                doc.add_picture(BytesIO(hist_bytes), width=docx.shared.Inches(5))
+                doc.add_heading('2. Batch Visual Analytics', level=1)
+                
+                # Radar Chart
+                top_3 = st.session_state.results[:3]
+                fig_radar = go.Figure()
+                for r in top_3:
+                    fig_radar.add_trace(go.Scatterpolar(r=list(r.scores.values()), theta=list(r.scores.keys()), fill='toself', name=r.candidate_name))
+                fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), showlegend=True, template="plotly_white", title="Top 3 Comparison")
+                radar_bytes = fig_radar.to_image(format="png", engine="kaleido")
+                doc.add_picture(BytesIO(radar_bytes), width=docx.shared.Inches(5.5))
+                
+                # Bubble Chart
+                df_bubble = pd.DataFrame([{"Name": r.candidate_name, "Score": r.total_score, "Rank": r.rank} for r in st.session_state.results])
+                fig_bubble = px.scatter(df_bubble, x="Rank", y="Score", size="Score", color="Score", title="Batch Match Strength Overview")
+                fig_bubble.update_layout(template="plotly_white")
+                bubble_bytes = fig_bubble.to_image(format="png", engine="kaleido")
+                doc.add_picture(BytesIO(bubble_bytes), width=docx.shared.Inches(5.5))
+                
             except Exception as e:
-                doc.add_paragraph(f"(Chart could not be generated: {str(e)})")
+                doc.add_paragraph(f"(Visualizations skipped: {str(e)})")
 
-            doc.add_heading('3. Candidate Breakdown', level=1)
+            doc.add_heading('3. Candidate Breakdown (Top 10)', level=1)
             for r in st.session_state.results[:10]:
                 doc.add_heading(f"Rank {r.rank}: {r.candidate_name}", level=2)
                 doc.add_paragraph(f"Overall Score: {r.total_score}%")
                 doc.add_paragraph(f"Recommendation: {r.recruiter_summary}")
                 
+                # Mini Donut Chart for Candidate
+                try:
+                    fig_donut = go.Figure(data=[go.Pie(labels=list(r.scores.keys()), values=list(r.scores.values()), hole=.6)])
+                    fig_donut.update_layout(showlegend=True, height=300, template="plotly_white")
+                    donut_bytes = fig_donut.to_image(format="png", engine="kaleido")
+                    doc.add_picture(BytesIO(donut_bytes), width=docx.shared.Inches(2.5))
+                except:
+                    pass
+
                 table = doc.add_table(rows=1, cols=2)
                 table.style = 'Table Grid'
                 hdr_cells = table.rows[0].cells
