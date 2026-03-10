@@ -1,0 +1,11 @@
+streamlit
+pandas
+plotly
+fpdf2
+python-docx
+pydantic
+faker
+python-dotenv
+kaleido
+PyPDF2
+numpy

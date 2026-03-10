@@ -1,0 +1,21 @@
+# Streamlit
+.streamlit/
+static/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.env
+venv/
+env/
+
+# Project Specific
+uploaded_resumes/*
+!uploaded_resumes/.gitkeep
+runs.jsonl
+users.json
+*.pdf
+*.docx
+*.json
+*.csv
