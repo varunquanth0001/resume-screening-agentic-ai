@@ -9,3 +9,4 @@ python-dotenv
 kaleido
 PyPDF2
 numpy
+matplotlib

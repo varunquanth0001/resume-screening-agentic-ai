@@ -14,6 +14,8 @@ from data_generator import generate_resumes
 
 # Load environment variables (Requirement 7)
 load_dotenv()
+import matplotlib.pyplot as plt
+import numpy as np
 from agent import ScreeningAgent
 from observability import JobCriterion, State
 from tools import ResumeParserTool
@@ -333,39 +335,53 @@ with col1:
             pdf.cell(0, 10, "1. Dashboard Visual Analytics", 0, 1)
             pdf.ln(5)
 
-            # --- Embedding Radar Chart ---
+            # --- Embedding Radar Chart (Using Matplotlib for robustness) ---
             try:
                 top_3 = st.session_state.results[:3]
-                fig_radar = go.Figure()
-                for r in top_3:
-                    fig_radar.add_trace(go.Scatterpolar(r=list(r.scores.values()), theta=list(r.scores.keys()), fill='toself', name=r.candidate_name))
-                fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), showlegend=True, template="plotly_white", title="Top 3 Candidates Comparison")
-                
-                radar_img_bytes = fig_radar.to_image(format="png", width=800, height=400, engine="kaleido")
-                radar_img_path = "temp_radar.png"
-                with open(radar_img_path, "wb") as f:
-                    f.write(radar_img_bytes)
-                
-                pdf.image(radar_img_path, x=10, w=190)
-                os.remove(radar_img_path)
-            except Exception as e:
-                pdf.cell(0, 10, f"(Note: Radar visualization skipped: {e})", 0, 1)
+                categories = list(top_3[0].scores.keys())
+                N = len(categories)
+                angles = [n / float(N) * 2 * np.pi for n in range(N)]
+                angles += angles[:1]
 
-            # --- Embedding Bubble Chart ---
-            try:
-                df_bubble = pd.DataFrame([{"Name": r.candidate_name, "Score": r.total_score, "Rank": r.rank} for r in st.session_state.results])
-                fig_bubble = px.scatter(df_bubble, x="Rank", y="Score", size="Score", color="Score", title="Batch Match Strength Overview")
-                fig_bubble.update_layout(template="plotly_white")
+                fig, ax = plt.subplots(figsize=(8, 6), subplot_kw=dict(polar=True))
+                plt.xticks(angles[:-1], categories, color='grey', size=8)
                 
-                bubble_img_bytes = fig_bubble.to_image(format="png", width=800, height=400, engine="kaleido")
-                bubble_img_path = "temp_bubble.png"
-                with open(bubble_img_path, "wb") as f:
-                    f.write(bubble_img_bytes)
+                for r in top_3:
+                    values = list(r.scores.values())
+                    values += values[:1]
+                    ax.plot(angles, values, linewidth=1, linestyle='solid', label=r.candidate_name)
+                    ax.fill(angles, values, alpha=0.1)
                 
-                pdf.image(bubble_img_path, x=10, w=190)
-                os.remove(bubble_img_path)
+                plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1))
+                plt.title("Top 3 Comparison", size=15, color='blue', y=1.1)
+                
+                radar_path = "temp_radar.png"
+                plt.savefig(radar_path, bbox_inches='tight')
+                plt.close()
+                
+                pdf.image(radar_path, x=10, w=190)
+                os.remove(radar_path)
             except Exception as e:
-                pdf.cell(0, 10, f"(Note: Bubble visualization skipped: {e})", 0, 1)
+                pdf.cell(0, 10, f"(Note: Radar skipped: {e})", 0, 1)
+
+            # --- Embedding Bubble Chart (Using Matplotlib) ---
+            try:
+                df_b = pd.DataFrame([{"Rank": r.rank, "Score": r.total_score} for r in st.session_state.results])
+                plt.figure(figsize=(10, 4))
+                plt.scatter(df_b['Rank'], df_b['Score'], s=df_b['Score']*5, c=df_b['Score'], cmap='viridis', alpha=0.6)
+                plt.title("Batch Match Strength Overview")
+                plt.xlabel("Rank")
+                plt.ylabel("Score")
+                plt.grid(True, linestyle='--', alpha=0.7)
+                
+                bubble_path = "temp_bubble.png"
+                plt.savefig(bubble_path, bbox_inches='tight')
+                plt.close()
+                
+                pdf.image(bubble_path, x=10, w=190)
+                os.remove(bubble_path)
+            except Exception as e:
+                pdf.cell(0, 10, f"(Note: Bubble skipped: {e})", 0, 1)
 
             pdf.ln(10)
 
@@ -405,14 +421,19 @@ with col1:
                 pdf.cell(100, 8, "OVERALL MATCH SCORE", 1)
                 pdf.cell(40, 8, f"{r.total_score}%", 1, 1, 'C')
                 
-                # --- Embedding Individual Donut Chart ---
+                # --- Embedding Individual Chart (Using Matplotlib) ---
                 try:
-                    fig_donut = go.Figure(data=[go.Pie(labels=list(r.scores.keys()), values=list(r.scores.values()), hole=.6)])
-                    fig_donut.update_layout(showlegend=True, height=300, template="plotly_white", margin=dict(l=0, r=0, t=0, b=0))
-                    donut_img_path = f"temp_donut_{r.resume_id}.png"
-                    fig_donut.write_image(donut_img_path)
-                    pdf.image(donut_img_path, x=145, y=pdf.get_y()-45, w=50) # Position next to scores
-                    os.remove(donut_img_path)
+                    labels = list(r.scores.keys())
+                    values = list(r.scores.values())
+                    fig, ax = plt.subplots(figsize=(3, 3))
+                    ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=90, wedgeprops=dict(width=0.4))
+                    
+                    donut_path = f"temp_donut_{r.resume_id}.png"
+                    plt.savefig(donut_path, bbox_inches='tight')
+                    plt.close()
+                    
+                    pdf.image(donut_path, x=145, y=pdf.get_y()-45, w=50) # Position next to scores
+                    os.remove(donut_path)
                 except:
                     pass
 
@@ -458,25 +479,43 @@ with col1:
             doc.add_paragraph(f"Total Processed: {st.session_state.metrics.get('total_processed')}")
             doc.add_paragraph(f"Batch Avg Score: {st.session_state.metrics.get('avg_score')}%")
 
-            # --- Embedding Visualizations in Word ---
+            # --- Embedding Visualizations in Word (Using Matplotlib for robustness) ---
             try:
                 doc.add_heading('2. Batch Visual Analytics', level=1)
                 
                 # Radar Chart
                 top_3 = st.session_state.results[:3]
-                fig_radar = go.Figure()
+                categories = list(top_3[0].scores.keys())
+                N = len(categories)
+                angles = [n / float(N) * 2 * np.pi for n in range(N)]
+                angles += angles[:1]
+
+                fig, ax = plt.subplots(figsize=(6, 5), subplot_kw=dict(polar=True))
+                plt.xticks(angles[:-1], categories, size=8)
                 for r in top_3:
-                    fig_radar.add_trace(go.Scatterpolar(r=list(r.scores.values()), theta=list(r.scores.keys()), fill='toself', name=r.candidate_name))
-                fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), showlegend=True, template="plotly_white", title="Top 3 Comparison")
-                radar_bytes = fig_radar.to_image(format="png", engine="kaleido")
-                doc.add_picture(BytesIO(radar_bytes), width=docx.shared.Inches(5.5))
+                    values = list(r.scores.values())
+                    values += values[:1]
+                    ax.plot(angles, values, linewidth=1, label=r.candidate_name)
+                    ax.fill(angles, values, alpha=0.1)
+                plt.legend(loc='upper right', bbox_to_anchor=(0.1, 0.1), fontsize='small')
+                
+                radar_io = BytesIO()
+                plt.savefig(radar_io, format='png', bbox_inches='tight')
+                plt.close()
+                radar_io.seek(0)
+                doc.add_picture(radar_io, width=docx.shared.Inches(5))
                 
                 # Bubble Chart
-                df_bubble = pd.DataFrame([{"Name": r.candidate_name, "Score": r.total_score, "Rank": r.rank} for r in st.session_state.results])
-                fig_bubble = px.scatter(df_bubble, x="Rank", y="Score", size="Score", color="Score", title="Batch Match Strength Overview")
-                fig_bubble.update_layout(template="plotly_white")
-                bubble_bytes = fig_bubble.to_image(format="png", engine="kaleido")
-                doc.add_picture(BytesIO(bubble_bytes), width=docx.shared.Inches(5.5))
+                plt.figure(figsize=(8, 3))
+                df_b = pd.DataFrame([{"Rank": r.rank, "Score": r.total_score} for r in st.session_state.results])
+                plt.scatter(df_b['Rank'], df_b['Score'], s=df_b['Score']*4, c=df_b['Score'], cmap='viridis', alpha=0.5)
+                plt.title("Batch Performance Overview")
+                
+                bubble_io = BytesIO()
+                plt.savefig(bubble_io, format='png', bbox_inches='tight')
+                plt.close()
+                bubble_io.seek(0)
+                doc.add_picture(bubble_io, width=docx.shared.Inches(5))
                 
             except Exception as e:
                 doc.add_paragraph(f"(Visualizations skipped: {str(e)})")
@@ -487,12 +526,19 @@ with col1:
                 doc.add_paragraph(f"Overall Score: {r.total_score}%")
                 doc.add_paragraph(f"Recommendation: {r.recruiter_summary}")
                 
-                # Mini Donut Chart for Candidate
+                # Mini Chart for Candidate (Using Matplotlib Pie)
                 try:
-                    fig_donut = go.Figure(data=[go.Pie(labels=list(r.scores.keys()), values=list(r.scores.values()), hole=.6)])
-                    fig_donut.update_layout(showlegend=True, height=300, template="plotly_white")
-                    donut_bytes = fig_donut.to_image(format="png", engine="kaleido")
-                    doc.add_picture(BytesIO(donut_bytes), width=docx.shared.Inches(2.5))
+                    labels = list(r.scores.keys())
+                    values = list(r.scores.values())
+                    fig, ax = plt.subplots(figsize=(3, 3))
+                    ax.pie(values, labels=labels, autopct='%1.1f%%', startangle=90, wedgeprops=dict(width=0.4))
+                    ax.set_title("Score Breakdown", size=10)
+                    
+                    donut_io = BytesIO()
+                    plt.savefig(donut_io, format='png', bbox_inches='tight')
+                    plt.close()
+                    donut_io.seek(0)
+                    doc.add_picture(donut_io, width=docx.shared.Inches(2.5))
                 except:
                     pass
 
