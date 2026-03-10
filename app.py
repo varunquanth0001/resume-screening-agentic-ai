@@ -48,16 +48,17 @@ def login_page():
     
     if st.session_state.auth_mode == "login":
         st.subheader("Login to your account")
-        u = st.text_input("Username", key="login_u")
+        u_or_e = st.text_input("Username or Email", key="login_u") # Updated label
         p = st.text_input("Password", type="password", key="login_p")
         
         col1, col2 = st.columns([1, 2])
         if col1.button("Login", use_container_width=True):
             users = load_users()
-            user = next((x for x in users if x["username"] == u and x["password"] == p), None)
+            # Find user by username OR email
+            user = next((x for x in users if (x["username"] == u_or_e or x.get("email") == u_or_e) and x["password"] == p), None)
             if user:
                 st.session_state.authenticated = True
-                st.session_state.username = u
+                st.session_state.username = user["username"]
                 st.success("Logged in successfully!")
                 st.rerun()
             else:
@@ -70,21 +71,26 @@ def login_page():
     else:
         st.subheader("Create a new account")
         new_u = st.text_input("Choose Username", key="signup_u")
+        new_e = st.text_input("Enter Email", key="signup_e") # Added Email
         new_p = st.text_input("Choose Password", type="password", key="signup_p")
         confirm_p = st.text_input("Confirm Password", type="password", key="signup_cp")
         
         col1, col2 = st.columns([1, 2])
         if col1.button("Register & Sign Up", use_container_width=True):
-            if not new_u or not new_p:
+            if not new_u or not new_p or not new_e: # Added Email check
                 st.error("Please fill all fields")
             elif new_p != confirm_p:
                 st.error("Passwords don't match")
+            elif "@" not in new_e or "." not in new_e: # Basic email validation
+                st.error("Please enter a valid email address")
             else:
                 users = load_users()
                 if any(x["username"] == new_u for x in users):
                     st.error("Username already exists")
+                elif any(x.get("email") == new_e for x in users): # Unique email check
+                    st.error("Email already registered")
                 else:
-                    users.append({"username": new_u, "password": new_p})
+                    users.append({"username": new_u, "email": new_e, "password": new_p})
                     save_users(users)
                     st.success("Account created successfully! Now you can Login.")
                     st.session_state.auth_mode = "login"
@@ -314,40 +320,63 @@ with col1:
             pdf.set_fill_color(41, 128, 185) # Blue header
             pdf.rect(0, 0, 210, 40, 'F')
             pdf.set_text_color(255, 255, 255)
-            pdf.set_font("Arial", "B", 24)
-            pdf.cell(0, 20, "RESUME SCREENING REPORT", 0, 1, 'C')
+            pdf.set_font("Arial", "B", 16)
+            pdf.cell(0, 20, "AGENTIC AI SCREENING REPORT", 0, 1, 'C')
             pdf.set_font("Arial", "", 10)
-            pdf.cell(0, 10, f"Run ID: {st.session_state.run_id} | Date: {pd.Timestamp.now().strftime('%Y-%m-%d')}", 0, 1, 'C')
+            pdf.cell(0, 10, f"Run ID: {st.session_state.run_id} | Date: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M')}", 0, 1, 'C')
             
             pdf.set_text_color(0, 0, 0)
             pdf.ln(10)
 
-            # 1. Overall Metrics
+            # 1. Dashboard Overview (Visualization Section)
             pdf.set_font("Arial", "B", 14)
-            pdf.cell(0, 10, "1. Executive Summary", 0, 1)
+            pdf.cell(0, 10, "1. Dashboard Visual Analytics", 0, 1)
+            pdf.ln(5)
+
+            # --- Embedding Radar Chart ---
+            try:
+                top_3 = st.session_state.results[:3]
+                fig_radar = go.Figure()
+                for r in top_3:
+                    fig_radar.add_trace(go.Scatterpolar(r=list(r.scores.values()), theta=list(r.scores.keys()), fill='toself', name=r.candidate_name))
+                fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), showlegend=True, template="plotly_white", title="Top 3 Candidates Comparison")
+                
+                radar_img_bytes = fig_radar.to_image(format="png", width=800, height=400)
+                radar_img_path = "temp_radar.png"
+                with open(radar_img_path, "wb") as f:
+                    f.write(radar_img_bytes)
+                
+                pdf.image(radar_img_path, x=10, w=190)
+                os.remove(radar_img_path)
+            except Exception as e:
+                pdf.cell(0, 10, f"(Note: Radar visualization skipped: {e})", 0, 1)
+
+            # --- Embedding Bubble Chart ---
+            try:
+                df_bubble = pd.DataFrame([{"Name": r.candidate_name, "Score": r.total_score, "Rank": r.rank} for r in st.session_state.results])
+                fig_bubble = px.scatter(df_bubble, x="Rank", y="Score", size="Score", color="Score", title="Batch Match Strength Overview")
+                fig_bubble.update_layout(template="plotly_white")
+                
+                bubble_img_bytes = fig_bubble.to_image(format="png", width=800, height=400)
+                bubble_img_path = "temp_bubble.png"
+                with open(bubble_img_path, "wb") as f:
+                    f.write(bubble_img_bytes)
+                
+                pdf.image(bubble_img_path, x=10, w=190)
+                os.remove(bubble_img_path)
+            except Exception as e:
+                pdf.cell(0, 10, f"(Note: Bubble visualization skipped: {e})", 0, 1)
+
+            pdf.ln(10)
+
+            # 2. Executive Summary
+            pdf.set_font("Arial", "B", 14)
+            pdf.cell(0, 10, "2. Executive Summary", 0, 1)
             pdf.set_font("Arial", "", 11)
             pdf.cell(0, 7, f"Total Resumes Processed: {st.session_state.metrics.get('total_processed')}", 0, 1)
             pdf.cell(0, 7, f"Average Agent Score: {st.session_state.metrics.get('avg_score')}%", 0, 1)
             pdf.cell(0, 7, f"Baseline Score: {st.session_state.metrics.get('baseline_score')}%", 0, 1)
             pdf.ln(5)
-
-            # 2. Analytics Charts
-            try:
-                pdf.set_font("Arial", "B", 14)
-                pdf.cell(0, 10, "2. Comparative Analytics (Top 3 Candidates)", 0, 1)
-                
-                top_3 = st.session_state.results[:3]
-                fig_radar = go.Figure()
-                for r in top_3:
-                    fig_radar.add_trace(go.Scatterpolar(r=list(r.scores.values()), theta=list(r.scores.keys()), fill='toself', name=r.candidate_name))
-                fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), showlegend=True, width=600, height=400)
-                
-                img_bytes = fig_radar.to_image(format="png", engine="kaleido")
-                pdf.image(BytesIO(img_bytes), x=25, w=160)
-                pdf.ln(5)
-            except Exception as e:
-                pdf.set_font("Arial", "I", 10)
-                pdf.cell(0, 10, f"(Chart could not be generated: {str(e)})", 0, 1)
 
             # 3. Candidate Deep-Dive
             pdf.add_page()
@@ -376,6 +405,17 @@ with col1:
                 pdf.cell(100, 8, "OVERALL MATCH SCORE", 1)
                 pdf.cell(40, 8, f"{r.total_score}%", 1, 1, 'C')
                 
+                # --- Embedding Individual Donut Chart ---
+                try:
+                    fig_donut = go.Figure(data=[go.Pie(labels=list(r.scores.keys()), values=list(r.scores.values()), hole=.6)])
+                    fig_donut.update_layout(showlegend=True, height=300, template="plotly_white", margin=dict(l=0, r=0, t=0, b=0))
+                    donut_img_path = f"temp_donut_{r.resume_id}.png"
+                    fig_donut.write_image(donut_img_path)
+                    pdf.image(donut_img_path, x=145, y=pdf.get_y()-45, w=50) # Position next to scores
+                    os.remove(donut_img_path)
+                except:
+                    pass
+
                 pdf.ln(2)
                 pdf.set_font("Arial", "I", 10)
                 pdf.multi_cell(0, 5, f"Agent Advice: {safe_summary}")
