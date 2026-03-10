@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 📄 Enterprise AI Resume Screening Agent
 
 A high-performance, **Multi-Agent RAG System** designed to automate and intelligently rank candidate resumes using **Deep LLM Reasoning**.
