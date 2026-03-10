@@ -205,8 +205,12 @@ criteria = [
     JobCriterion(name="Education Match", weight=edu_weight, education_keywords=edu_keywords)
 ]
 
+# Ensure upload directory exists on server
+if not os.path.exists("uploaded_resumes"):
+    os.makedirs("uploaded_resumes")
+
 # Main UI
-st.title("📄 Resume Screening Assistant")
+st.title("🚀 Enterprise AI Resume Screening Assistant")
 st.markdown("---")
 
 uploaded_files = []
