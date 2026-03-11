@@ -840,7 +840,7 @@ st.markdown("---")
 st.markdown(
         """
         <div style='text-align: center; color: grey;'>
-            <p>Enterprise AI Resume Screening Agent | Built with Multi-Agent RAG Architecture</p>
+            <p>Resume Screening Assistant | Built with Multi-Agent RAG Architecture</p>
             <p><i>Standard Compliance: JSONL Logging | Seed-based Reproducibility | State Machine Observability</i></p>
         </div>
         """,
