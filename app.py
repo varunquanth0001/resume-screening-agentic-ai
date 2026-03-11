@@ -28,73 +28,121 @@ st.set_page_config(page_title="Resume Screening Assistant", layout="wide")
 st.markdown("""
     <style>
     /* Global Styles */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
     
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
+        background-color: #0e1117;
+    }
+
+    code, pre {
+        font-family: 'JetBrains Mono', monospace !important;
     }
     
-    /* Card Styling */
-    .stMetric, .stAlert, .stButton, div[data-testid="stExpander"], .stDataFrame {
-        border-radius: 12px !important;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    /* Glassmorphism Effect */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .glass-card:hover {
+        border: 1px solid rgba(41, 128, 185, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+    }
+    
+    /* Glowing Metric Cards */
+    div[data-testid="stMetric"] {
+        background: rgba(41, 128, 185, 0.05);
+        border-left: 4px solid #2980b9;
+        padding: 15px !important;
+        border-radius: 8px !important;
     }
     
     /* Sidebar Gradient */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #1e1e1e 0%, #121212 100%);
+        background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+        border-right: 1px solid rgba(255,255,255,0.05);
     }
     
-    /* Header Gradient Text */
+    /* Header Gradient Text with Glow */
     .header-text {
-        background: linear-gradient(90deg, #5dade2 0%, #2980b9 100%);
+        background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-weight: 700;
-        font-size: 2.5rem;
+        font-weight: 800;
+        font-size: 2.8rem;
+        letter-spacing: -1px;
+        filter: drop-shadow(0 0 10px rgba(37, 99, 235, 0.2));
     }
     
-    /* Modern Button Styling */
+    /* Animated Button Styling */
     .stButton>button {
-        background: linear-gradient(90deg, #2980b9 0%, #3498db 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
         color: white !important;
         border: none !important;
         font-weight: 600 !important;
-        padding: 0.6rem 1.2rem !important;
-        transition: transform 0.2s, box-shadow 0.2s !important;
+        border-radius: 10px !important;
+        padding: 0.8rem 1.5rem !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.8rem !important;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+        width: 100%;
     }
     
     .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(41, 128, 185, 0.4);
+        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+        background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
     }
     
-    /* Tabs Styling */
+    /* Tabs Styling - Modern Pill Style */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 10px;
-        background-color: transparent;
+        gap: 8px;
+        background-color: rgba(255,255,255,0.03);
+        padding: 8px;
+        border-radius: 12px;
     }
     
     .stTabs [data-baseweb="tab"] {
-        height: 45px;
-        background-color: #1e1e1e;
-        border-radius: 8px 8px 0 0;
-        padding: 10px 20px;
-        color: #888;
+        background-color: transparent;
+        border-radius: 8px;
+        padding: 8px 16px;
+        color: #94a3b8;
+        border: none !important;
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: #2980b9 !important;
+        background-color: #3b82f6 !important;
         color: white !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
     
-    /* Portal-like Login Container */
-    .login-container {
-        background-color: #1e1e1e;
-        padding: 3rem;
-        border-radius: 20px;
-        border: 1px solid #333;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #0e1117;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #334155;
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #475569;
+    }
+
+    /* Expander Styling */
+    div[data-testid="stExpander"] {
+        background-color: rgba(255,255,255,0.02) !important;
+        border: 1px solid rgba(255,255,255,0.05) !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -717,7 +765,12 @@ with col1:
     if st.session_state.metrics:
         st.subheader("📊 Screening Analytics")
         m = st.session_state.metrics
-        st.info(f"🏗️ **Infrastructure:** {m.get('infrastructure', 'N/A')}")
+        st.markdown(f"""
+        <div class='glass-card'>
+            <p style='margin-bottom: 0px; color: #94a3b8; font-size: 0.8rem;'>🏗️ Infrastructure</p>
+            <p style='font-family: JetBrains Mono; color: #60a5fa;'>{m.get('infrastructure', 'N/A')}</p>
+        </div>
+        """, unsafe_allow_html=True)
         
         col_m1, col_m2, col_m3 = st.columns(3)
         col_m1.metric("Processed", m.get("total_processed", 0))
