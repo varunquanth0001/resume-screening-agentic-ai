@@ -460,7 +460,13 @@ with col1:
                     # Mention skills in PDF
                     pdf.set_font("Arial", "I", 8)
                     pdf.set_xy(145, pdf.get_y() + 5)
-                    pdf.cell(50, 5, f"Metrics: {', '.join(labels)}", 0, 0, 'C')
+                    pdf.cell(50, 5, f"Metrics: {', '.join(labels)}", 0, 1, 'C')
+                    
+                    if r.matched_skills:
+                        pdf.set_xy(145, pdf.get_y())
+                        pdf.set_font("Arial", "B", 7)
+                        pdf.multi_cell(50, 4, f"Matched: {', '.join(r.matched_skills)}", 0, 'C')
+                    
                     pdf.set_xy(10, pdf.get_y() + 5)
                 except:
                     pass
@@ -578,7 +584,11 @@ with col1:
                     
                     # Skills for this candidate
                     p_skills = doc.add_paragraph()
-                    p_skills.add_run(f"Analyzed Skills: {', '.join(labels)}").italic = True
+                    p_skills.add_run(f"Analyzed Categories: {', '.join(labels)}").italic = True
+                    
+                    if r.matched_skills:
+                        p_m = doc.add_paragraph()
+                        p_m.add_run(f"Matched Skills: {', '.join(r.matched_skills)}").bold = True
                 except:
                     pass
 
@@ -729,7 +739,14 @@ with col2:
                     # Mention analyzed criteria names below the radar chart
                     if top_3:
                         skills_list = " | ".join([f"<b>{c}</b>" for c in list(top_3[0].scores.keys())])
-                        st.markdown(f"<div style='text-align: center; background-color: #1e1e1e; padding: 10px; border-radius: 5px; border: 1px solid #333;'>🎯 <b>Top Analyzed Skills:</b> {skills_list}</div>", unsafe_allow_html=True)
+                        matched_list = " | ".join([f"<span style='color:#5dade2;'>{s}</span>" for s in (top_3[0].matched_skills or [])])
+                        
+                        st.markdown(f"""
+                        <div style='text-align: center; background-color: #1e1e1e; padding: 15px; border-radius: 10px; border: 1px solid #333;'>
+                            <div style='margin-bottom: 8px;'>🎯 <b>Top Analyzed Categories:</b> {skills_list}</div>
+                            <div style='font-size: 0.9em; border-top: 1px solid #444; padding-top: 8px;'>✅ <b>Specific Skills Matched:</b> {matched_list if matched_list else 'N/A'}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
 
                 st.subheader("Batch Distribution (Bubble View)")
                 # Bubble chart - circular visualization of all candidates
@@ -768,6 +785,12 @@ with col2:
                             # Explicitly mention top skills for this candidate
                             skills_summary = ", ".join(list(r.scores.keys()))
                             st.caption(f"📊 **Metrics Analyzed:** {skills_summary}")
+                            
+                            # Show matched specific skills for this candidate
+                            if r.matched_skills:
+                                st.markdown(f"✅ **Matched Skills:** {', '.join(r.matched_skills)}")
+                            else:
+                                st.caption("No specific skills extracted yet.")
             else:
                 st.info("Detailed reports will be generated after a run.")
 

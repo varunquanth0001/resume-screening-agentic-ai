@@ -85,3 +85,4 @@ class ScoringResult(BaseModel):
     rank: Optional[int] = None
     recruiter_summary: Optional[str] = None
     interview_questions: Optional[List[str]] = None
+    matched_skills: Optional[List[str]] = None # Capture specific matched skills (e.g., Python, SQL)

@@ -21,7 +21,12 @@ class TechnicalAgent:
         analysis = self.llm.analyze_content(resume.summary + " " + " ".join(resume.skills), criteria)
         
         self.obs.log_tool_call(self.name, {"id": resume.id}, {"analysis": analysis}, thought=thought)
-        return {"parsed": parsed, "tech_score": sum(analysis["scores"].values()) / len(analysis["scores"]) / 100, "reasoning": analysis["reasoning"]}
+        return {
+            "parsed": parsed, 
+            "tech_score": sum(analysis["scores"].values()) / len(analysis["scores"]) / 100, 
+            "reasoning": analysis["reasoning"],
+            "matched_skills": analysis.get("matched_skills", [])
+        }
 
 class SoftSkillsAgent:
     def __init__(self, obs):
@@ -103,7 +108,8 @@ class AuditorAgent:
             resume_id=tech_parsed["id"],
             candidate_name=tech_parsed["name"],
             scores=scores,
-            total_score=round(final_score * 100, 2)
+            total_score=round(final_score * 100, 2),
+            matched_skills=tech_data.get("matched_skills", [])
         )
 
 class RecruiterAgent:

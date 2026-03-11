@@ -21,6 +21,7 @@ class LLMAnalyzerTool:
         # Optimized simulated LLM "Deep Reasoning" (No artificial latency)
         reasoning = []
         scores = {}
+        matched_skills = []
         
         for crit in criteria:
             # LLM doesn't just match keywords, it understands context
@@ -34,11 +35,18 @@ class LLMAnalyzerTool:
             else:
                 reasoning.append(f"No significant evidence of {crit.name} proficiency found in the narrative.")
             
+            # Identify which specific skills matched
+            if crit.required_skills:
+                for skill in crit.required_skills:
+                    if skill.lower() in text.lower() and skill not in matched_skills:
+                        matched_skills.append(skill)
+            
             scores[crit.name] = round(score * 100, 2)
 
         return {
             "scores": scores,
             "reasoning": reasoning,
+            "matched_skills": matched_skills,
             "model": "gpt-4o-preview" if not self.is_mock else "mock-llm-v1"
         }
 
