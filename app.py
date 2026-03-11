@@ -456,6 +456,12 @@ with col1:
                     
                     pdf.image(donut_path, x=145, y=pdf.get_y()-45, w=50) # Position next to scores
                     os.remove(donut_path)
+                    
+                    # Mention skills in PDF
+                    pdf.set_font("Arial", "I", 8)
+                    pdf.set_xy(145, pdf.get_y() + 5)
+                    pdf.cell(50, 5, f"Metrics: {', '.join(labels)}", 0, 0, 'C')
+                    pdf.set_xy(10, pdf.get_y() + 5)
                 except:
                     pass
 
@@ -527,6 +533,14 @@ with col1:
                 radar_io.seek(0)
                 doc.add_picture(radar_io, width=docx.shared.Inches(5))
                 
+                # Mention skills in Word
+                skills_text = " | ".join(categories)
+                p = doc.add_paragraph()
+                p.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.CENTER
+                run = p.add_run(f"Analyzed Criteria: {skills_text}")
+                run.bold = True
+                run.font.size = docx.shared.Pt(10)
+                
                 # Bubble Chart
                 plt.figure(figsize=(8, 3))
                 df_b = pd.DataFrame([{"Rank": r.rank, "Score": r.total_score} for r in st.session_state.results])
@@ -561,6 +575,10 @@ with col1:
                     plt.close()
                     donut_io.seek(0)
                     doc.add_picture(donut_io, width=docx.shared.Inches(2.5))
+                    
+                    # Skills for this candidate
+                    p_skills = doc.add_paragraph()
+                    p_skills.add_run(f"Analyzed Skills: {', '.join(labels)}").italic = True
                 except:
                     pass
 
@@ -707,6 +725,11 @@ with col2:
                         fig_radar.add_trace(go.Scatterpolar(r=values, theta=categories, fill='toself', name=r.candidate_name))
                     fig_radar.update_layout(polar=dict(radialaxis=dict(visible=True, range=[0, 100])), height=300, showlegend=True, template="plotly_dark", margin=dict(l=20, r=20, t=50, b=20))
                     st.plotly_chart(fig_radar, use_container_width=True)
+                    
+                    # Mention analyzed criteria names below the radar chart
+                    if top_3:
+                        skills_list = " | ".join([f"<b>{c}</b>" for c in list(top_3[0].scores.keys())])
+                        st.markdown(f"<div style='text-align: center; background-color: #1e1e1e; padding: 10px; border-radius: 5px; border: 1px solid #333;'>🎯 <b>Top Analyzed Skills:</b> {skills_list}</div>", unsafe_allow_html=True)
 
                 st.subheader("Batch Distribution (Bubble View)")
                 # Bubble chart - circular visualization of all candidates
@@ -741,7 +764,10 @@ with col2:
                                                             hole=.6)])
                             fig_donut.update_layout(showlegend=False, height=200, margin=dict(l=0, r=0, t=0, b=0), template="plotly_dark")
                             st.plotly_chart(fig_donut, use_container_width=True, key=f"donut_{r.resume_id}_{st.session_state.run_id}")
-                            st.caption("Score Weightage Breakdown")
+                            
+                            # Explicitly mention top skills for this candidate
+                            skills_summary = ", ".join(list(r.scores.keys()))
+                            st.caption(f"📊 **Metrics Analyzed:** {skills_summary}")
             else:
                 st.info("Detailed reports will be generated after a run.")
 
