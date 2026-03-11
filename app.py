@@ -28,121 +28,130 @@ st.set_page_config(page_title="Resume Screening Assistant", layout="wide")
 st.markdown("""
     <style>
     /* Global Styles */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap');
     
     html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-        background-color: #0e1117;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: #050505;
     }
 
     code, pre {
         font-family: 'JetBrains Mono', monospace !important;
     }
     
-    /* Glassmorphism Effect */
+    /* Cyber-Nexus Glassmorphism */
     .glass-card {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 20px;
-        margin-bottom: 20px;
-        transition: all 0.3s ease;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        padding: 24px;
+        margin-bottom: 24px;
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .glass-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+        transition: 0.5s;
+    }
+    
+    .glass-card:hover::before {
+        left: 100%;
     }
     
     .glass-card:hover {
-        border: 1px solid rgba(41, 128, 185, 0.5);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        border: 1px solid rgba(59, 130, 246, 0.5);
+        transform: translateY(-5px) scale(1.01);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.1);
     }
     
-    /* Glowing Metric Cards */
+    /* Neon Status Badge */
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+    }
+    
+    /* Ultra-Modern Metric Cards */
     div[data-testid="stMetric"] {
-        background: rgba(41, 128, 185, 0.05);
-        border-left: 4px solid #2980b9;
-        padding: 15px !important;
-        border-radius: 8px !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        padding: 20px !important;
+        border-radius: 16px !important;
+        transition: 0.3s;
     }
     
-    /* Sidebar Gradient */
+    div[data-testid="stMetric"]:hover {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+    
+    /* Sidebar Luxury Design */
     [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+        background: #020617 !important;
         border-right: 1px solid rgba(255,255,255,0.05);
     }
     
-    /* Header Gradient Text with Glow */
+    /* Super-Glow Header */
     .header-text {
-        background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+        background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800;
-        font-size: 2.8rem;
-        letter-spacing: -1px;
-        filter: drop-shadow(0 0 10px rgba(37, 99, 235, 0.2));
+        font-size: 3.2rem;
+        letter-spacing: -2px;
+        filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
     }
     
-    /* Animated Button Styling */
+    /* Ultimate Button Styling */
     .stButton>button {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-        color: white !important;
+        background: #fff !important;
+        color: #000 !important;
         border: none !important;
-        font-weight: 600 !important;
-        border-radius: 10px !important;
-        padding: 0.8rem 1.5rem !important;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        font-size: 0.8rem !important;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-        width: 100%;
+        font-weight: 800 !important;
+        border-radius: 12px !important;
+        padding: 1rem 2rem !important;
+        font-size: 0.85rem !important;
+        transition: all 0.3s ease !important;
     }
     
     .stButton>button:hover {
-        transform: scale(1.02);
-        box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
-        background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+        background: #3b82f6 !important;
+        color: #fff !important;
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
     }
     
-    /* Tabs Styling - Modern Pill Style */
+    /* Luxury Tabs */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
-        background-color: rgba(255,255,255,0.03);
-        padding: 8px;
-        border-radius: 12px;
+        background-color: #0f172a;
+        padding: 10px;
+        border-radius: 16px;
+        border: 1px solid rgba(255,255,255,0.05);
     }
     
     .stTabs [data-baseweb="tab"] {
-        background-color: transparent;
-        border-radius: 8px;
-        padding: 8px 16px;
-        color: #94a3b8;
-        border: none !important;
+        color: #64748b;
+        font-weight: 600;
+        transition: 0.3s;
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: #3b82f6 !important;
-        color: white !important;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-    }
-    
-    /* Scrollbar Styling */
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-        background: #0e1117;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #334155;
+        background-color: rgba(255,255,255,0.05) !important;
+        color: #fff !important;
         border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: #475569;
-    }
-
-    /* Expander Styling */
-    div[data-testid="stExpander"] {
-        background-color: rgba(255,255,255,0.02) !important;
-        border: 1px solid rgba(255,255,255,0.05) !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -767,8 +776,13 @@ with col1:
         m = st.session_state.metrics
         st.markdown(f"""
         <div class='glass-card'>
-            <p style='margin-bottom: 0px; color: #94a3b8; font-size: 0.8rem;'>🏗️ Infrastructure</p>
-            <p style='font-family: JetBrains Mono; color: #60a5fa;'>{m.get('infrastructure', 'N/A')}</p>
+            <div style='display: flex; justify-content: space-between; align-items: center;'>
+                <div>
+                    <p style='margin-bottom: 0px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;'>Infrastructure Engine</p>
+                    <p style='font-family: JetBrains Mono; color: #fff; font-size: 1.1rem; font-weight: 600;'>{m.get('infrastructure', 'N/A')}</p>
+                </div>
+                <div class='status-badge'>● SYSTEM ONLINE</div>
+            </div>
         </div>
         """, unsafe_allow_html=True)
         
