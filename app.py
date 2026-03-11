@@ -46,7 +46,7 @@ def save_users(users):
         json.dump(users, f, indent=4)
 
 def login_page():
-    st.title("🔐 Agent Screening System")
+    st.title("🔐 Enterprise AI Resume Screening Assistant")
     
     if st.session_state.auth_mode == "login":
         st.subheader("Login to your account")
@@ -218,7 +218,7 @@ if not os.path.exists("uploaded_resumes"):
     os.makedirs("uploaded_resumes")
 
 # Main UI
-st.title("🚀 Enterprise AI Resume Screening Assistant")
+st.title("🚀 Resume Screening Assistant")
 st.markdown("---")
 
 uploaded_files = []
@@ -323,7 +323,7 @@ with col1:
             pdf.rect(0, 0, 210, 40, 'F')
             pdf.set_text_color(255, 255, 255)
             pdf.set_font("Arial", "B", 16)
-            pdf.cell(0, 20, "AGENTIC AI SCREENING REPORT", 0, 1, 'C')
+            pdf.cell(0, 20, "RESUME SCREENING ASSISTANT", 0, 1, 'C')
             pdf.set_font("Arial", "", 10)
             pdf.cell(0, 10, f"Run ID: {st.session_state.run_id} | Date: {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M')}", 0, 1, 'C')
             
@@ -471,7 +471,7 @@ with col1:
         # Word (DOCX) Download Button
         try:
             doc = Document()
-            doc.add_heading('RESUME SCREENING ANALYTICS REPORT', 0)
+            doc.add_heading('RESUME SCREENING ASSISTANT REPORT', 0)
             doc.add_paragraph(f"Run ID: {st.session_state.run_id}")
             doc.add_paragraph(f"Date: {pd.Timestamp.now().strftime('%Y-%m-%d')}")
 
