@@ -46,7 +46,7 @@ def save_users(users):
         json.dump(users, f, indent=4)
 
 def login_page():
-    st.title("🔐 Enterprise AI Resume Screening Assistant")
+    st.title("🔐 Resume Screening Assistant")
     
     if st.session_state.auth_mode == "login":
         st.subheader("Login to your account")
@@ -218,7 +218,7 @@ if not os.path.exists("uploaded_resumes"):
     os.makedirs("uploaded_resumes")
 
 # Main UI
-st.title("🚀 Resume Screening Assistant")
+st.title("🚀 AI Resume Screening Assistant")
 st.markdown("---")
 
 uploaded_files = []
@@ -471,7 +471,7 @@ with col1:
         # Word (DOCX) Download Button
         try:
             doc = Document()
-            doc.add_heading('RESUME SCREENING ASSISTANT REPORT', 0)
+            doc.add_heading('ENTERPRISE AI RESUME SCREENING ASSISTANT REPORT', 0)
             doc.add_paragraph(f"Run ID: {st.session_state.run_id}")
             doc.add_paragraph(f"Date: {pd.Timestamp.now().strftime('%Y-%m-%d')}")
 
