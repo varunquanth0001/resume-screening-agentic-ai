@@ -24,6 +24,81 @@ from tools import ResumeParserTool
 # Page Config
 st.set_page_config(page_title="Resume Screening Assistant", layout="wide")
 
+# Custom CSS for Modern UI (Requirement: Attractive Frontend)
+st.markdown("""
+    <style>
+    /* Global Styles */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Card Styling */
+    .stMetric, .stAlert, .stButton, div[data-testid="stExpander"], .stDataFrame {
+        border-radius: 12px !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    /* Sidebar Gradient */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1e1e1e 0%, #121212 100%);
+    }
+    
+    /* Header Gradient Text */
+    .header-text {
+        background: linear-gradient(90deg, #5dade2 0%, #2980b9 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
+        font-size: 2.5rem;
+    }
+    
+    /* Modern Button Styling */
+    .stButton>button {
+        background: linear-gradient(90deg, #2980b9 0%, #3498db 100%);
+        color: white !important;
+        border: none !important;
+        font-weight: 600 !important;
+        padding: 0.6rem 1.2rem !important;
+        transition: transform 0.2s, box-shadow 0.2s !important;
+    }
+    
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(41, 128, 185, 0.4);
+    }
+    
+    /* Tabs Styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+        background-color: transparent;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        height: 45px;
+        background-color: #1e1e1e;
+        border-radius: 8px 8px 0 0;
+        padding: 10px 20px;
+        color: #888;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background-color: #2980b9 !important;
+        color: white !important;
+    }
+    
+    /* Portal-like Login Container */
+    .login-container {
+        background-color: #1e1e1e;
+        padding: 3rem;
+        border-radius: 20px;
+        border: 1px solid #333;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
 # Initialize Session State
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
@@ -75,54 +150,66 @@ def register_user(u, e, p):
         return False
 
 def login_page():
-    st.title("🔐 Resume Screening Assistant")
+    st.markdown("<div style='text-align: center; margin-bottom: 2rem;'><h1 class='header-text'>🔐 RESUME SCREENING ASSISTANT</h1><p style='color: #888;'>Enterprise AI Multi-Agent Intelligence</p></div>", unsafe_allow_html=True)
     
-    if st.session_state.auth_mode == "login":
-        st.subheader("Login to your account")
-        u_or_e = st.text_input("Username or Email", key="login_u")
-        p = st.text_input("Password", type="password", key="login_p")
-        
-        col1, col2 = st.columns([1, 2])
-        if col1.button("Login", use_container_width=True):
-            username = login_user(u_or_e, p)
-            if username:
-                st.session_state.authenticated = True
-                st.session_state.username = username
-                st.success("Logged in successfully!")
-                st.rerun()
-            else:
-                st.error("Invalid credentials")
-        
-        if st.button("New user? Create an account (Sign Up)"):
-            st.session_state.auth_mode = "signup"
-            st.rerun()
+    col_l, col_r = st.columns([1, 1.5])
+    
+    with col_l:
+        st.markdown("""
+        ### 🤖 Why use our platform?
+        - **Deep LLM Analysis**: Moving beyond keyword matching.
+        - **Multi-Agent Coordination**: Specialized agents for Tech & Soft skills.
+        - **Secure SQL Storage**: Your data is safe with us.
+        - **Visual Insights**: Professional reporting & analytics.
+        """, unsafe_allow_html=True)
+
+    with col_r:
+        if st.session_state.auth_mode == "login":
+            st.subheader("Welcome Back")
+            u_or_e = st.text_input("Username or Email", key="login_u")
+            p = st.text_input("Password", type="password", key="login_p")
             
-    else:
-        st.subheader("Create a new account")
-        new_u = st.text_input("Choose Username", key="signup_u")
-        new_e = st.text_input("Enter Email", key="signup_e")
-        new_p = st.text_input("Choose Password", type="password", key="signup_p")
-        confirm_p = st.text_input("Confirm Password", type="password", key="signup_p_confirm")
-        
-        col1, col2 = st.columns([1, 2])
-        if col1.button("Register & Sign Up", use_container_width=True):
-            if not new_u or not new_p or not new_e:
-                st.error("Please fill all fields")
-            elif new_p != confirm_p:
-                st.error("Passwords don't match")
-            elif "@" not in new_e or "." not in new_e:
-                st.error("Please enter a valid email address")
-            else:
-                if register_user(new_u, new_e, new_p):
-                    st.success("Account created successfully! Now you can Login.")
-                    st.session_state.auth_mode = "login"
+            if st.button("Login to Dashboard", use_container_width=True):
+                username = login_user(u_or_e, p)
+                if username:
+                    st.session_state.authenticated = True
+                    st.session_state.username = username
+                    st.success("Logged in successfully!")
                     st.rerun()
                 else:
-                    st.error("Username or Email already exists")
-        
-        if st.button("Already have an account? Go to Login"):
-            st.session_state.auth_mode = "login"
-            st.rerun()
+                    st.error("Invalid credentials")
+            
+            st.markdown("---")
+            if st.button("New user? Create a Free Account"):
+                st.session_state.auth_mode = "signup"
+                st.rerun()
+                
+        else:
+            st.subheader("Join the Platform")
+            new_u = st.text_input("Choose Username", key="signup_u")
+            new_e = st.text_input("Enter Email", key="signup_e")
+            new_p = st.text_input("Choose Password", type="password", key="signup_p")
+            confirm_p = st.text_input("Confirm Password", type="password", key="signup_p_confirm")
+            
+            if st.button("Register & Get Started", use_container_width=True):
+                if not new_u or not new_p or not new_e:
+                    st.error("Please fill all fields")
+                elif new_p != confirm_p:
+                    st.error("Passwords don't match")
+                elif "@" not in new_e or "." not in new_e:
+                    st.error("Please enter a valid email address")
+                else:
+                    if register_user(new_u, new_e, new_p):
+                        st.success("Account created successfully! Now you can Login.")
+                        st.session_state.auth_mode = "login"
+                        st.rerun()
+                    else:
+                        st.error("Username or Email already exists")
+            
+            st.markdown("---")
+            if st.button("Already have an account? Login Here"):
+                st.session_state.auth_mode = "login"
+                st.rerun()
 
 # Main App Guard
 if not st.session_state.authenticated:
@@ -131,7 +218,7 @@ if not st.session_state.authenticated:
 
 # Sidebar - User Info & Logout
 with st.sidebar:
-    st.markdown(f"### 👤 Welcome, {st.session_state.username}")
+    st.markdown(f"<h2 class='header-text' style='font-size: 1.5rem;'>Welcome, {st.session_state.username}</h2>", unsafe_allow_html=True)
     if st.button("🚪 Logout", use_container_width=True):
         st.session_state.authenticated = False
         st.session_state.username = None
@@ -148,7 +235,7 @@ if "feedback" not in st.session_state:
     st.session_state.feedback = {}
 
 # Sidebar - Configuration
-st.sidebar.header("Run Configuration")
+st.sidebar.header("⚙️ Run Configuration")
 source_mode = st.sidebar.radio("Data Source", ["Synthetic Resumes", "Upload PDFs"])
 scenarios = [
     "Custom", "Data Scientist", "Frontend Developer", "DevOps Engineer", 
