@@ -147,7 +147,7 @@ class ScreeningAgent:
         self.max_steps = max_steps
         self.simulate_failure = simulate_failure
         
-        # Enterprise Infrastructure
+        # Advanced Infrastructure
         self.llm = LLMAnalyzerTool(api_key=os.getenv("OPENAI_API_KEY"))
         self.vector_db = VectorDBTool()
         
@@ -163,7 +163,7 @@ class ScreeningAgent:
             "total_time": 0.0,
             "baseline_score": 0.0,
             "agents_active": 4,
-            "infrastructure": "Enterprise-Ready (RAG + LLM Simulator)"
+            "infrastructure": "Advanced (RAG + LLM Reasoning Engine)"
         }
 
     def run(self, resumes: List[Resume]) -> List[ScoringResult]:

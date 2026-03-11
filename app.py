@@ -471,7 +471,7 @@ with col1:
         # Word (DOCX) Download Button
         try:
             doc = Document()
-            doc.add_heading('ENTERPRISE AI RESUME SCREENING ASSISTANT REPORT', 0)
+            doc.add_heading('RESUME SCREENING ASSISTANT REPORT', 0)
             doc.add_paragraph(f"Run ID: {st.session_state.run_id}")
             doc.add_paragraph(f"Date: {pd.Timestamp.now().strftime('%Y-%m-%d')}")
 
@@ -578,7 +578,7 @@ with col1:
         st.rerun()
 
     if st.session_state.metrics:
-        st.subheader("📊 Enterprise Metrics")
+        st.subheader("📊 Screening Analytics")
         m = st.session_state.metrics
         st.info(f"🏗️ **Infrastructure:** {m.get('infrastructure', 'N/A')}")
         
@@ -822,7 +822,7 @@ with col_feed:
             for r in st.session_state.results:
                 if r.candidate_name == selected_candidate:
                     # We store the base score if not already stored to allow multiple adjustments
-                    base_key = f"base_score_{r.id}"
+                    base_key = f"base_score_{r.resume_id}"
                     if base_key not in st.session_state:
                         st.session_state[base_key] = r.total_score
                     
