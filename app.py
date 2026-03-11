@@ -10,6 +10,7 @@ from fpdf import FPDF
 from docx import Document
 from io import BytesIO
 from dotenv import load_dotenv
+import sqlite3
 from data_generator import generate_resumes
 
 # Load environment variables (Requirement 7)
@@ -31,36 +32,62 @@ if "username" not in st.session_state:
 if "auth_mode" not in st.session_state:
     st.session_state.auth_mode = "signup" # Default to Sign Up as requested
 
-# User Database Functions
-def load_users():
-    if not os.path.exists("users.json"):
-        return []
-    try:
-        with open("users.json", "r") as f:
-            return json.load(f)
-    except:
-        return []
+# Database Initialization (Requirement: Professional Tech Stack)
+def init_db():
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS users 
+                 (username TEXT PRIMARY KEY, email TEXT UNIQUE, password TEXT)''')
+    
+    # Migrate from JSON if it exists and DB is empty
+    c.execute("SELECT COUNT(*) FROM users")
+    if c.fetchone()[0] == 0 and os.path.exists("users.json"):
+        try:
+            with open("users.json", "r") as f:
+                old_users = json.load(f)
+                for u in old_users:
+                    c.execute("INSERT OR IGNORE INTO users (username, email, password) VALUES (?, ?, ?)",
+                              (u["username"], u["email"], u["password"]))
+        except: pass
+    
+    conn.commit()
+    conn.close()
 
-def save_users(users):
-    with open("users.json", "w") as f:
-        json.dump(users, f, indent=4)
+init_db()
+
+def login_user(u_or_e, p):
+    conn = sqlite3.connect("users.db")
+    c = conn.cursor()
+    c.execute("SELECT username FROM users WHERE (username=? OR email=?) AND password=?", (u_or_e, u_or_e, p))
+    user = c.fetchone()
+    conn.close()
+    return user[0] if user else None
+
+def register_user(u, e, p):
+    try:
+        conn = sqlite3.connect("users.db")
+        c = conn.cursor()
+        c.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", (u, e, p))
+        conn.commit()
+        conn.close()
+        return True
+    except sqlite3.IntegrityError:
+        return False
 
 def login_page():
     st.title("🔐 Resume Screening Assistant")
     
     if st.session_state.auth_mode == "login":
         st.subheader("Login to your account")
-        u_or_e = st.text_input("Username or Email", key="login_u") # Updated label
+        u_or_e = st.text_input("Username or Email", key="login_u")
         p = st.text_input("Password", type="password", key="login_p")
         
         col1, col2 = st.columns([1, 2])
         if col1.button("Login", use_container_width=True):
-            users = load_users()
-            # Find user by username OR email
-            user = next((x for x in users if (x["username"] == u_or_e or x.get("email") == u_or_e) and x["password"] == p), None)
-            if user:
+            username = login_user(u_or_e, p)
+            if username:
                 st.session_state.authenticated = True
-                st.session_state.username = user["username"]
+                st.session_state.username = username
                 st.success("Logged in successfully!")
                 st.rerun()
             else:
@@ -73,30 +100,25 @@ def login_page():
     else:
         st.subheader("Create a new account")
         new_u = st.text_input("Choose Username", key="signup_u")
-        new_e = st.text_input("Enter Email", key="signup_e") # Added Email
+        new_e = st.text_input("Enter Email", key="signup_e")
         new_p = st.text_input("Choose Password", type="password", key="signup_p")
-        confirm_p = st.text_input("Confirm Password", type="password", key="signup_cp")
+        confirm_p = st.text_input("Confirm Password", type="password", key="signup_p_confirm")
         
         col1, col2 = st.columns([1, 2])
         if col1.button("Register & Sign Up", use_container_width=True):
-            if not new_u or not new_p or not new_e: # Added Email check
+            if not new_u or not new_p or not new_e:
                 st.error("Please fill all fields")
             elif new_p != confirm_p:
                 st.error("Passwords don't match")
-            elif "@" not in new_e or "." not in new_e: # Basic email validation
+            elif "@" not in new_e or "." not in new_e:
                 st.error("Please enter a valid email address")
             else:
-                users = load_users()
-                if any(x["username"] == new_u for x in users):
-                    st.error("Username already exists")
-                elif any(x.get("email") == new_e for x in users): # Unique email check
-                    st.error("Email already registered")
-                else:
-                    users.append({"username": new_u, "email": new_e, "password": new_p})
-                    save_users(users)
+                if register_user(new_u, new_e, new_p):
                     st.success("Account created successfully! Now you can Login.")
                     st.session_state.auth_mode = "login"
                     st.rerun()
+                else:
+                    st.error("Username or Email already exists")
         
         if st.button("Already have an account? Go to Login"):
             st.session_state.auth_mode = "login"

@@ -28,14 +28,17 @@ The system follows a **Decentralized Multi-Agent State Machine**:
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Professional Tech Stack
 
-- **Frontend/Dashboard**: [Streamlit](https://streamlit.io/)
-- **Core Language**: Python 3.8+
-- **Data Visualization**: Plotly, Pandas, Matplotlib
+- **Frontend/Dashboard**: [Streamlit](https://streamlit.io/) (React-based Python Framework)
+- **Backend Orchestration**: Python 3.8+ with Multi-Agent State Machine
+- **Database (RDBMS)**: **SQLite 3** (SQL-based persistent storage for user management)
+- **AI/RAG Engine**: 
+  - **Vector Storage**: Simulated Semantic Vector DB for context retrieval
+  - **LLM Reasoning**: Deep analysis using GPT-4 level logic simulation
+- **Data Visualization**: Plotly (Interactive), Matplotlib (Report-ready)
+- **Observability**: JSON Lines (JSONL) Structured Logging
 - **Export Engines**: FPDF2, Python-Docx
-- **Infrastructure Simulation**: RAG-lite (Vector Store), Mock LLM (GPT-4 logic)
-- **Logging**: JSON Lines (JSONL)
 
 ---
 

@@ -15,6 +15,7 @@ uploaded_resumes/*
 !uploaded_resumes/.gitkeep
 runs.jsonl
 users.json
+users.db
 *.pdf
 *.docx
 *.json
