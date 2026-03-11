@@ -27,130 +27,122 @@ st.set_page_config(page_title="Resume Screening Assistant", layout="wide")
 # Custom CSS for Modern UI (Requirement: Attractive Frontend)
 st.markdown("""
     <style>
-    /* Global Styles */
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;500&display=swap');
+    /* Global Styles - Hyper-Minimalist Quartz */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&display=swap');
     
     html, body, [class*="css"] {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        background-color: #050505;
+        font-family: 'Outfit', sans-serif;
+        background-color: #030303;
     }
 
     code, pre {
         font-family: 'JetBrains Mono', monospace !important;
     }
     
-    /* Cyber-Nexus Glassmorphism */
+    /* Quartz Glass Components */
     .glass-card {
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 24px;
-        padding: 24px;
-        margin-bottom: 24px;
-        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .glass-card::before {
-        content: '';
-        position: absolute;
-        top: 0; left: -100%;
-        width: 100%; height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-        transition: 0.5s;
-    }
-    
-    .glass-card:hover::before {
-        left: 100%;
+        background: rgba(255, 255, 255, 0.02);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 30px;
+        padding: 30px;
+        margin-bottom: 25px;
+        transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     }
     
     .glass-card:hover {
-        border: 1px solid rgba(59, 130, 246, 0.5);
-        transform: translateY(-5px) scale(1.01);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.1);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transform: translateY(-8px) scale(1.005);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8);
     }
     
-    /* Neon Status Badge */
-    .status-badge {
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        background: rgba(16, 185, 129, 0.1);
-        color: #10b981;
-        border: 1px solid rgba(16, 185, 129, 0.2);
-        box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
-    }
-    
-    /* Ultra-Modern Metric Cards */
+    /* Luxury Metric Displays */
     div[data-testid="stMetric"] {
-        background: rgba(255, 255, 255, 0.02) !important;
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        padding: 20px !important;
-        border-radius: 16px !important;
-        transition: 0.3s;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
     }
     
-    div[data-testid="stMetric"]:hover {
-        background: rgba(255, 255, 255, 0.04) !important;
-        border-color: rgba(59, 130, 246, 0.3) !important;
+    div[data-testid="stMetricValue"] {
+        font-weight: 800 !important;
+        font-size: 2.5rem !important;
+        background: linear-gradient(180deg, #fff 0%, #64748b 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
     
-    /* Sidebar Luxury Design */
+    /* Sidebar - Minimalist Control Center */
     [data-testid="stSidebar"] {
-        background: #020617 !important;
-        border-right: 1px solid rgba(255,255,255,0.05);
+        background: #000 !important;
+        border-right: 1px solid rgba(255,255,255,0.03);
     }
     
-    /* Super-Glow Header */
+    /* Floating Header - Luxury Branding */
     .header-text {
-        background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+        background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.5) 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800;
-        font-size: 3.2rem;
-        letter-spacing: -2px;
-        filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
+        font-size: 3.5rem;
+        letter-spacing: -3px;
+        line-height: 1;
+        margin-bottom: 1rem;
     }
     
-    /* Ultimate Button Styling */
+    /* Quartz Primary Button */
     .stButton>button {
-        background: #fff !important;
-        color: #000 !important;
+        background: #FFFFFF !important;
+        color: #000000 !important;
+        border-radius: 100px !important;
+        padding: 1.2rem 2.5rem !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
         border: none !important;
-        font-weight: 800 !important;
-        border-radius: 12px !important;
-        padding: 1rem 2rem !important;
-        font-size: 0.85rem !important;
-        transition: all 0.3s ease !important;
+        transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1) !important;
+        text-transform: none;
+        letter-spacing: -0.5px;
     }
     
     .stButton>button:hover {
-        background: #3b82f6 !important;
-        color: #fff !important;
-        box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
+        transform: scale(1.05);
+        box-shadow: 0 20px 40px rgba(255, 255, 255, 0.2);
     }
     
-    /* Luxury Tabs */
+    /* Subtle Pill Navigation */
     .stTabs [data-baseweb="tab-list"] {
-        background-color: #0f172a;
-        padding: 10px;
-        border-radius: 16px;
-        border: 1px solid rgba(255,255,255,0.05);
+        background-color: transparent;
+        gap: 20px;
     }
     
     .stTabs [data-baseweb="tab"] {
-        color: #64748b;
-        font-weight: 600;
-        transition: 0.3s;
+        background-color: transparent;
+        color: #475569;
+        font-weight: 500;
+        font-size: 1rem;
+        border: none !important;
+        transition: 0.4s;
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: rgba(255,255,255,0.05) !important;
         color: #fff !important;
+        font-weight: 700;
+    }
+
+    /* Modern Expander Styling */
+    div[data-testid="stExpander"] {
+        border-radius: 20px !important;
+        background: rgba(255,255,255,0.01) !important;
+        border: 1px solid rgba(255,255,255,0.03) !important;
+    }
+    
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #1e293b;
         border-radius: 10px;
     }
     </style>
@@ -772,17 +764,12 @@ with col1:
         st.rerun()
 
     if st.session_state.metrics:
-        st.subheader("📊 Screening Analytics")
+        st.subheader("📊 Analytics")
         m = st.session_state.metrics
         st.markdown(f"""
         <div class='glass-card'>
-            <div style='display: flex; justify-content: space-between; align-items: center;'>
-                <div>
-                    <p style='margin-bottom: 0px; color: #64748b; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;'>Infrastructure Engine</p>
-                    <p style='font-family: JetBrains Mono; color: #fff; font-size: 1.1rem; font-weight: 600;'>{m.get('infrastructure', 'N/A')}</p>
-                </div>
-                <div class='status-badge'>● SYSTEM ONLINE</div>
-            </div>
+            <p style='margin-bottom: 8px; color: #475569; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;'>Infrastructure</p>
+            <p style='font-family: JetBrains Mono; color: #fff; font-size: 1rem;'>{m.get('infrastructure', 'N/A')}</p>
         </div>
         """, unsafe_allow_html=True)
         
